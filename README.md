@@ -9,11 +9,11 @@ This project aims to create a real-time network topology mapper capable of intel
 
 ## Key Features
 
-- [] Real-Time Device Discovery: Rapidly identifies connected devices on the network.
-- [] Port Scanning: Detects open ports and attempts to identify running services.
-- [] Dynamic Topology Updates: Updates network topology in real-time to reflect changes.
-- [] IPC for Real-Time Data: Uses POSIX Message Queues for fast, real-time inter-process communication between C and Rust components.
-- [] Event-Driven Architecture: Utilizes asynchronous programming in Rust to handle real-time events effectively.
+- [ ] Real-Time Device Discovery: Rapidly identifies connected devices on the network.
+- [ ] Port Scanning: Detects open ports and attempts to identify running services.
+- [ ] Dynamic Topology Updates: Updates network topology in real-time to reflect changes.
+- [ ] IPC for Real-Time Data: Uses POSIX Message Queues for fast, real-time inter-process communication between C and Rust components.
+- [ ] Event-Driven Architecture: Utilizes asynchronous programming in Rust to handle real-time events effectively.
 
 ## Technologies Used
 
