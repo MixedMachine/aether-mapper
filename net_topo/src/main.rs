@@ -1,3 +1,10 @@
-fn main() {
-    println!("Hello, world!");
+extern "C" {
+    fn initiate_scan();
 }
+
+fn main() {
+    unsafe {
+        initiate_scan();
+    }
+}
+
