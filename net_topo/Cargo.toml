@@ -5,3 +5,5 @@ edition = "2021"
 build = "build.rs"
 
 [dependencies]
+tokio = { version = "1", features = ["full"] }
+tungstenite = "0.14.0"
