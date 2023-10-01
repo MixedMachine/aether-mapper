@@ -4,9 +4,8 @@ extern "C" {
 }
 
 fn main() {
-    messaging::server::start().expect("Server crashed");
+    messaging::server::start(8080).expect("Server crashed");
     unsafe {
         initiate_scan();
     }
 }
-
