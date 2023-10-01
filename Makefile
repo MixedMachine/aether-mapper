@@ -1,4 +1,4 @@
-.PHONY: dev clean
+.PHONY: dev test clean
 
 dev:
 	@echo "Starting up in dev env..."
@@ -10,7 +10,7 @@ dev:
 	@cd net_topo && cargo update -q && cargo run -q
 
 test:
-	@cd net_topo &&	cargo test -- --nocapture
+	@cd net_topo &&	cargo test -q -- --nocapture
 
 clean:
 	@cd net_topo && cargo clean
