@@ -77,6 +77,8 @@ fn classify_message(msg: &str) -> Result<MessageType, &'static str> {
 
 #[cfg(test)]
 mod tests {
+    use std::collections::HashMap;
+
     use super::*;
     use tokio_test::io::Builder;
 
@@ -98,12 +100,12 @@ mod tests {
 
     #[tokio::test]
     async fn test_process_host_scan() {
-        let input_data = r#"{"type": "host_scan", "data": [80, 8080]}"#;
+        let input_data = r#"{"type": "host_scan", "host": "192.168.0.1", "data": [80, 8080]}"#;
         let mut fake_stream = Builder::new().read(input_data.as_bytes()).build();
         
         match process(&mut fake_stream).await {
             Ok(result) => {
-                assert_eq!(result[0], "Received host scan result with open ports: [80, 8080]")
+                assert_eq!(result[0], r#"Received host scan result with open ports: {"192.168.0.1": [80, 8080]}"#)
             },
             _ => {
                 panic!("Failed to process host scan message.")
@@ -127,10 +129,12 @@ mod tests {
 
     #[test]
     fn test_classify_message_valid_host_scan() {
-        let msg = r#"{"type": "host_scan", "data": [80, 8080]}"#;
+        let msg = r#"{"type": "host_scan", "host": "192.168.0.1", "data": [80, 8080]}"#;
+        let mut expected: HashMap<String, Vec<u16>> = HashMap::new();
+        expected.insert("192.168.0.1".to_string(), vec![80, 8080]);
         match classify_message(msg) {
-            Ok(MessageType::HostScanResult(ScanResult::Ports(ports))) => {
-                assert_eq!(ports, vec![80, 8080]);
+            Ok(MessageType::HostScanResult(ScanResult::Ports(host_ports))) => {
+                assert_eq!(host_ports, expected);
             }
             _ => panic!("Failed to classify a valid host scan message."),
         }

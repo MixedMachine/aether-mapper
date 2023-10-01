@@ -1,5 +1,6 @@
 use serde_json::Value;
 use std::convert::TryFrom;
+use std::collections::HashMap;
 
 
 #[derive(Debug)]
@@ -11,7 +12,7 @@ pub enum MessageType {
 #[derive(Debug)]
 pub enum ScanResult {
     Hosts(Vec<String>),
-    Ports(Vec<u16>),
+    Ports(HashMap<String, Vec<u16>>),
 }
 
 impl TryFrom<&Value> for ScanResult {
@@ -28,10 +29,13 @@ impl TryFrom<&Value> for ScanResult {
                         Ok(ScanResult::Hosts(hosts))
                     },
                     "host_scan" => {
+                        let host = value["host"].as_str().ok_or("Missing host for host_scan")?;
                         let ports = data.iter()
                             .filter_map(|val| val.as_u64().map(|v| v as u16))
                             .collect::<Vec<u16>>();
-                        Ok(ScanResult::Ports(ports))
+                        let mut host_ports: HashMap<String, Vec<u16>> = HashMap::new();
+                        host_ports.insert(host.to_string(), ports);
+                        Ok(ScanResult::Ports(host_ports))
                     },
                     _ => Err("Unknown message type"),
                 }
