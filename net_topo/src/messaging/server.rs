@@ -1,24 +1,60 @@
 #![allow(dead_code)]
+use std::{collections::HashMap, sync::{Arc, Mutex}};
 use serde_json::Value;
+use tokio::spawn;
 use tokio::io::AsyncReadExt;
+use tokio::net::TcpListener;
 use super::models::{MessageType, ScanResult};
 
-
-pub fn start(port: u16) -> Result<(), Box<dyn std::error::Error>> {
-    println!("Running messaging server on 127.0.0.1:{port}");
-    Ok(())
+// The shared state
+struct ServerState {
+    hosts: HashMap<String, Vec<u16>>,
 }
 
+impl ServerState {
+    fn new() -> Self {
+        ServerState {
+            hosts: HashMap::new(),
+        }
+    }
+}
 
+pub async fn start(host: &str, port: u16) -> Result<(), Box<dyn std::error::Error>> {
+    let addr = format!("{}:{}", host, port);
+    let listener = TcpListener::bind(&addr).await?;
+    println!("Listening on {}", addr);
+
+    loop {
+        let (socket, _) = listener.accept().await?;
+        
+        spawn(async move {
+            let processed = process(socket).await;
+            // Further processing
+            match processed {
+                Ok(messages) => {
+                    for msg in messages {
+                        println!("{}", msg);
+                    }
+                },
+                Err(err) => {
+                    eprintln!("{}", err);
+                }
+            }
+       });
+    }
+}
+    
 async fn process<RW>(mut socket: RW) -> Result<Vec<String>, Box<dyn std::error::Error>>
 where
     RW: tokio::io::AsyncRead + tokio::io::AsyncWrite + Unpin,
 {
+    let state = Arc::new(Mutex::new(ServerState::new()));
     let mut buf = vec![0; 1024];
     let mut status_msgs = Vec::new();
 
     loop {
         let n = socket.read(&mut buf).await?;
+        let _state_clone = Arc::clone(&state);
 
         if n == 0 {
             break;
@@ -77,9 +113,8 @@ fn classify_message(msg: &str) -> Result<MessageType, &'static str> {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashMap;
-
     use super::*;
+    use std::collections::HashMap;
     use tokio_test::io::Builder;
 
     #[tokio::test]

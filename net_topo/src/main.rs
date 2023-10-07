@@ -2,9 +2,9 @@ mod messaging;
 extern "C" {
     fn initiate_scan();
 }
-
-fn main() {
-    messaging::server::start(8080).expect("Server crashed");
+#[tokio::main]
+async fn main() {
+    messaging::server::start("127.0.0.1", 8080).await.expect("Server crashed");
     unsafe {
         initiate_scan();
     }
